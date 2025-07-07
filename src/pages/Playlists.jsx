@@ -5,16 +5,16 @@ import PlaylistListPage from "../components/PlaylistListPage";
 import VideoCardSkeleton from "../components/VideoCardSkeleton";
 
 function Playlists() {
-  const { username } = useParams();
+  const { userName } = useParams();
 
   const { data: playlists, isLoading } = useQuery({
-    queryKey: ["playlists", username],
+    queryKey: ["playlists", userName],
     queryFn: async () => {
-      const res = await axiosInstance.get(`/playlists/user/${username}`);
+      const res = await axiosInstance.get(`/playlists/user/${userName}`);
       return res?.data?.data || [];
     },
     staleTime: Infinity,
-    enabled: !!username,
+    enabled: !!userName,
   });
 
   return (
@@ -38,7 +38,7 @@ function Playlists() {
                 playlistId={playlist._id}
                 playlistName={playlist.name}
                 totalVideos={playlist.videos.length}
-                username={username}
+                userName={userName}
               />
             ))
           ) : (
