@@ -20,7 +20,7 @@ export default function Protected({children , authentication = true}) {
     return <>{children}</>
 }
 
-Protected.PropTypes = {
+Protected.propTypes = {
     children : PropTypes.any,
     authentication : PropTypes.bool
 }

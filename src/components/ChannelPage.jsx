@@ -31,7 +31,7 @@ function ChannelPage () {
                     subscribed = {owner.subscribedToCount}
                 />
             )}
-            <Outlet/>
+             <Outlet/> {/* used to render nested routes */}
         </section>
     )
 }
