@@ -32,7 +32,7 @@ export const getPlaylistById = createAsyncThunk(
   async (playlistId, { rejectWithValue }) => {
     try {
       const response = await api.get(`/playlists/${playlistId}`);
-      return response.data.data[0]; // Backend returns array, assume first element
+      return response.data.data; // <-- CHANGE THIS LINE
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }

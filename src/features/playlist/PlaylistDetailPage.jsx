@@ -19,6 +19,12 @@ const PlaylistDetailPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { currentPlaylist, loading, error } = useSelector((state) => state.playlist);
+
+  console.log('PlaylistDetailPage rendering');
+  console.log('currentPlaylist from Redux:', currentPlaylist);
+  console.log('Loading state:', loading);
+  console.log('Error state:', error);
+  
   const { user: currentUser } = useSelector((state) => state.auth);
 
   const [isEditing, setIsEditing] = useState(false);

@@ -1,9 +1,8 @@
-// videotube-frontend/src/pages/LikedVideosPage.jsx
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLikedVideos } from '../features/like/likeSlice.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
-import VideoCard from '../components/VideoCard.jsx'; // Assuming you have this component
+import VideoCard from '../components/VideoCard.jsx'; 
 
 const LikedVideosPage = () => {
   const dispatch = useDispatch();
@@ -37,8 +36,6 @@ const LikedVideosPage = () => {
       <h1 className="text-3xl font-bold text-white mb-6">Your Liked Videos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {likedVideos.map((video) => (
-          // The backend structure for likedVideos directly contains video objects
-          // If it was just video IDs, you'd need to fetch full video details here.
           <VideoCard key={video._id} video={video} />
         ))}
       </div>
