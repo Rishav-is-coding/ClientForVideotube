@@ -1,15 +1,12 @@
-export const content = [
-  "./src/**/*.{js,jsx,ts,tsx}"
-];
-export const theme = {
-  extend: {
-    colors: {
-      primary: {
-        light: '#3b82f6',
-        DEFAULT: '#2563eb',
-        dark: '#1d4ed8',
-      }
-    }
-  }
-};
-export const plugins = [];
+// videotube-frontend/tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
