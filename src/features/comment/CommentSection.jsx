@@ -132,7 +132,7 @@ const CommentSection = ({ videoId }) => {
           {comments.map((comment) => (
             <div key={comment._id} className="flex items-start space-x-4 bg-gray-700 p-4 rounded-lg shadow">
               <img
-                src={comment.owner?.avatar?.url || "https://via.placeholder.com/40"}
+                src={comment.owner?.avatar?.url }
                 alt={comment.owner?.fullName}
                 className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-600"
               />

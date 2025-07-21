@@ -149,7 +149,7 @@ const UserTweetsPage = () => {
             <div key={tweet._id} className="bg-gray-800 p-6 rounded-lg shadow-lg">
               <div className="flex items-center space-x-3 mb-3">
                 <img
-                  src={tweet.owner?.avatar?.url || "https://via.placeholder.com/40"}
+                  src={tweet.owner?.avatar?.url }
                   alt={tweet.owner?.fullName}
                   className="w-10 h-10 rounded-full object-cover border border-gray-600"
                 />

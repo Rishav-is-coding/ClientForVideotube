@@ -31,7 +31,7 @@ const Header = () => {
               </Link>
               <div className="relative group inline-block p-2 -my-2 rounded-full">
                 <img
-                  src={user?.avatar || "https://via.placeholder.com/40"} // Placeholder for user avatar
+                  src={user?.avatar } 
                   alt="User Avatar"
                   className="w-10 h-10 rounded-full cursor-pointer object-cover border-2 border-gray-600 group-hover:border-purple-500 transition-colors"
                 />

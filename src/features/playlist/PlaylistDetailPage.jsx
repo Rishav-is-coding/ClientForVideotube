@@ -185,7 +185,7 @@ const PlaylistDetailPage = () => {
             <p className="text-gray-300 text-lg mb-4">{currentPlaylist.description || 'No description provided.'}</p>
             <Link to={`/channel/${currentPlaylist.owner?.userName}`} className="flex items-center text-gray-400 hover:text-white mb-4">
               <img
-                src={currentPlaylist.owner?.avatar || "https://via.placeholder.com/30"}
+                src={currentPlaylist.owner?.avatar }
                 alt={currentPlaylist.owner?.fullName}
                 className="w-8 h-8 rounded-full object-cover mr-2"
               />
