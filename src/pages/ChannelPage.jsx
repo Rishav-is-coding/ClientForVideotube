@@ -3,14 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../utils/api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
-import VideoCard from '../components/VideoCard.jsx'; // To display user's videos
+import VideoCard from '../components/VideoCard.jsx';
 import { useSelector, useDispatch } from 'react-redux';
-import { toggleSubscription } from '../features/subscription/subscriptionSlice.js'; // Assuming this slice
+import { toggleSubscription, getSubscribedChannels } from '../features/subscription/subscriptionSlice.js'; // Import getSubscribedChannels
 
 const ChannelPage = () => {
   const { userName } = useParams();
   const dispatch = useDispatch();
-  const { user: currentUser } = useSelector((state) => state.auth);
+  const { user: currentUser } = useSelector((state) => state.auth); // Ensure currentUser is available
 
   const [channelData, setChannelData] = useState(null);
   const [channelVideos, setChannelVideos] = useState([]);
@@ -40,7 +40,7 @@ const ChannelPage = () => {
     if (userName) {
       fetchChannelData();
     }
-  }, [userName, currentUser]); // Refetch if currentUser changes (e.g., login/logout)
+  }, [userName, currentUser]);
 
   const handleSubscribeToggle = async () => {
     if (!currentUser) {
@@ -48,18 +48,20 @@ const ChannelPage = () => {
       return;
     }
     if (channelData?.isSubscribed === undefined) {
-      // Prevent action if subscription status isn't loaded yet
       return;
     }
 
     const resultAction = await dispatch(toggleSubscription(channelData._id));
     if (toggleSubscription.fulfilled.match(resultAction)) {
-      // Update local state to reflect new subscription status and count
       setChannelData(prev => ({
         ...prev,
         isSubscribed: resultAction.payload.isSubscribed,
         subscribersCount: resultAction.payload.subscribers,
       }));
+      // FIX: Re-fetch subscribed channels for the sidebar
+      if (currentUser?.userName) {
+        dispatch(getSubscribedChannels(currentUser.userName));
+      }
     } else {
       alert(resultAction.payload || "Failed to toggle subscription");
     }
@@ -130,10 +132,8 @@ const ChannelPage = () => {
       <nav className="border-b border-gray-700 mb-6">
         <ul className="flex space-x-8 text-lg font-medium text-gray-400">
           <li className="pb-2 border-b-2 border-purple-500 text-white">Videos</li>
-          {/* Add more nav items: e.g., <Link to={`/channel/${userName}/playlists`}>Playlists</Link> */}
           <li><Link to={`/playlists/${userName}`} className="hover:text-white">Playlists</Link></li>
           <li><Link to={`/tweets/${userName}`} className="hover:text-white">Tweets</Link></li>
-          {/* etc. */}
         </ul>
       </nav>
 

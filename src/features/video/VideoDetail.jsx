@@ -1,42 +1,101 @@
 // videotube-frontend/src/features/video/VideoDetail.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getVideoById, clearCurrentVideo, getRecommendedVideos } from './videoSlice';
-import { toggleVideoLike } from '../like/likeSlice.js'; // Assuming you create this
-import { toggleSubscription } from '../subscription/subscriptionSlice.js'; // Assuming you create this
+import { toggleVideoLike } from '../like/likeSlice.js';
+import { toggleSubscription, getSubscribedChannels } from '../subscription/subscriptionSlice.js'; // Import getSubscribedChannels
+// Import playlist actions
+import {
+  getUserPlaylists,
+  addVideoToPlaylist,
+  removeVideoFromPlaylist,
+  clearUserPlaylists
+} from '../playlist/playlistSlice.js';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
-import CommentSection from '../comment/CommentSection.jsx'; // Assuming you create this
+import CommentSection from '../comment/CommentSection.jsx';
 
 const VideoDetail = () => {
   const { videoId } = useParams();
   const dispatch = useDispatch();
   const { currentVideo, loading, error, recommendedVideos } = useSelector((state) => state.video);
   const { user: currentUser } = useSelector((state) => state.auth);
+  // Get playlists state
+  const { userPlaylists, loading: playlistsLoading, error: playlistsError } = useSelector((state) => state.playlist);
+
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [playlistActionMessage, setPlaylistActionMessage] = useState('');
 
   useEffect(() => {
     if (videoId) {
       dispatch(getVideoById(videoId));
-      dispatch(getRecommendedVideos(videoId)); // Fetch recommendations
+      dispatch(getRecommendedVideos(videoId));
     }
     return () => {
-      dispatch(clearCurrentVideo()); // Clean up on unmount
+      dispatch(clearCurrentVideo());
+      dispatch(clearUserPlaylists()); // Clear playlists from Redux on unmount
     };
   }, [videoId, dispatch]);
 
+  // Fetch user playlists when modal is opened and user is authenticated
+  useEffect(() => {
+    if (showPlaylistModal && currentUser) {
+      dispatch(getUserPlaylists(currentUser.userName));
+    } else if (!showPlaylistModal) {
+      dispatch(clearUserPlaylists()); // Clear playlists when modal closes
+    }
+  }, [showPlaylistModal, currentUser, dispatch]);
+
   const handleLikeToggle = () => {
-    if (currentUser) {
-      dispatch(toggleVideoLike(videoId));
-    } else {
+    if (!currentUser) {
       alert('Please login to like videos!');
+      return;
+    }
+    dispatch(toggleVideoLike(videoId));
+  };
+
+  const handleSubscribeToggle = async () => { // Made async to await dispatch
+    if (!currentUser) {
+      alert('Please login to subscribe!');
+      return;
+    }
+    if (currentVideo?.owner?._id) {
+      const resultAction = await dispatch(toggleSubscription(currentVideo.owner._id));
+      // FIX: Re-fetch subscribed channels for the sidebar after toggle
+      if (toggleSubscription.fulfilled.match(resultAction) && currentUser?.userName) {
+        dispatch(getSubscribedChannels(currentUser.userName));
+      } else if (toggleSubscription.rejected.match(resultAction)) {
+        alert(resultAction.payload || "Failed to toggle subscription");
+      }
     }
   };
 
-  const handleSubscribeToggle = () => {
-    if (currentUser && currentVideo?.owner?._id) {
-      dispatch(toggleSubscription(currentVideo.owner._id));
+  const handleTogglePlaylistModal = () => {
+    if (!currentUser) {
+      alert('Please login to add videos to playlists!');
+      return;
+    }
+    setShowPlaylistModal(prev => !prev);
+  };
+
+  const handleToggleVideoInPlaylist = async (playlistId, isVideoInPlaylist) => {
+    setPlaylistActionMessage('');
+    if (isVideoInPlaylist) {
+      const resultAction = await dispatch(removeVideoFromPlaylist({ playlistId, videoId }));
+      if (removeVideoFromPlaylist.fulfilled.match(resultAction)) {
+        setPlaylistActionMessage(`Removed from playlist.`);
+        dispatch(getUserPlaylists(currentUser.userName)); // Re-fetch for modal consistency
+      } else {
+        setPlaylistActionMessage(resultAction.payload || 'Failed to remove from playlist.');
+      }
     } else {
-      alert('Please login to subscribe!');
+      const resultAction = await dispatch(addVideoToPlaylist({ playlistId, videoId }));
+      if (addVideoToPlaylist.fulfilled.match(resultAction)) {
+        setPlaylistActionMessage(`Added to playlist.`);
+        dispatch(getUserPlaylists(currentUser.userName)); // Re-fetch for modal consistency
+      } else {
+        setPlaylistActionMessage(resultAction.payload || 'Failed to add to playlist.');
+      }
     }
   };
 
@@ -52,8 +111,8 @@ const VideoDetail = () => {
     return <div className="text-gray-400 text-center text-xl mt-8">Video not found.</div>;
   }
 
-  // Helper to format large numbers
   const formatNumber = (num) => {
+    if (num === undefined || num === null) return 'N/A';
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(0) + 'K';
     return num;
@@ -114,7 +173,12 @@ const VideoDetail = () => {
             >
               <span className="mr-1">{currentVideo.isLiked ? '❤️' : '👍'}</span> {formatNumber(currentVideo.likesCount)}
             </button>
-            {/* Share, Save (Playlist) buttons can be added here */}
+            <button
+              onClick={handleTogglePlaylistModal}
+              className="flex items-center px-3 py-1 rounded-full text-sm bg-gray-700 text-gray-300 hover:bg-gray-600"
+            >
+              <span className="mr-1">💾</span> Save (Playlist)
+            </button>
           </div>
         </div>
 
@@ -151,7 +215,6 @@ const VideoDetail = () => {
         </div>
 
         {/* Comments Section */}
-        {/* Pass videoId to CommentSection to fetch comments */}
         <CommentSection videoId={videoId} />
       </div>
 
@@ -179,6 +242,64 @@ const VideoDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Playlist Modal */}
+      {showPlaylistModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">Add to Playlist</h2>
+              <button
+                onClick={handleTogglePlaylistModal}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                &times;
+              </button>
+            </div>
+
+            {playlistActionMessage && (
+              <p className={`mb-4 text-center text-sm ${playlistActionMessage.includes('Added') || playlistActionMessage.includes('Removed') ? 'text-green-400' : 'text-red-400'}`}>
+                {playlistActionMessage}
+              </p>
+            )}
+
+            {playlistsLoading ? (
+              <p className="text-gray-400">Loading playlists...</p>
+            ) : playlistsError ? (
+              <p className="text-red-400">Error loading playlists.</p>
+            ) : userPlaylists.length > 0 ? (
+              <ul className="space-y-3">
+                {userPlaylists.map((playlist) => {
+                  const isVideoInPlaylist = playlist.videos.some(vid => vid._id === videoId);
+                  return (
+                    <li key={playlist._id} className="flex items-center justify-between bg-gray-700 p-3 rounded-md">
+                      <label className="flex items-center text-white cursor-pointer flex-1">
+                        <input
+                          type="checkbox"
+                          checked={isVideoInPlaylist}
+                          onChange={() => handleToggleVideoInPlaylist(playlist._id, isVideoInPlaylist)}
+                          className="form-checkbox h-5 w-5 text-purple-600 bg-gray-600 border-gray-500 rounded focus:ring-purple-500 transition-colors duration-200"
+                        />
+                        <span className="ml-3 font-semibold">{playlist.name}</span>
+                      </label>
+                      <span className="text-gray-400 text-sm ml-2">({playlist.videos.length} videos)</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-gray-400">You don't have any playlists yet. <Link to="/create-playlist" className="text-purple-400 hover:underline">Create one!</Link></p>
+            )}
+
+            <button
+              onClick={handleTogglePlaylistModal}
+              className="mt-6 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

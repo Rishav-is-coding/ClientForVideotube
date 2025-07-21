@@ -1,8 +1,11 @@
 // videotube-frontend/src/features/video/videoSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../utils/api.js';
+// Import specific fulfilled actions from other slices
+import { toggleVideoLike } from '../like/likeSlice.js';
+import { toggleSubscription } from '../subscription/subscriptionSlice.js';
 
-// Async Thunks
+// Async Thunks (Keep all existing thunks as they are)
 export const getAllVideos = createAsyncThunk(
   'video/getAllVideos',
   async ({ page = 1, limit = 10, query = '', sortBy = 'createdAt', sortType = 'desc' }, { rejectWithValue }) => {
@@ -75,7 +78,7 @@ export const deleteVideo = createAsyncThunk(
   async (videoId, { rejectWithValue }) => {
     try {
       await api.delete(`/videos/delete/${videoId}`);
-      return videoId; // Return ID to remove from state
+      return videoId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -138,10 +141,7 @@ const videoSlice = createSlice({
       })
       .addCase(getAllVideos.fulfilled, (state, action) => {
         state.loading = false;
-        state.videos = action.payload; // Backend returns an array, adjust if paginated object is expected
-        // If your backend for getAllVideos sends pagination metadata:
-        // state.videos = action.payload.docs;
-        // state.pagination = { ...action.payload };
+        state.videos = action.payload;
       })
       .addCase(getAllVideos.rejected, (state, action) => {
         state.loading = false;
@@ -154,7 +154,7 @@ const videoSlice = createSlice({
       })
       .addCase(publishVideo.fulfilled, (state, action) => {
         state.loading = false;
-        state.videos.unshift(action.payload); // Add new video to top of list
+        state.videos.unshift(action.payload);
       })
       .addCase(publishVideo.rejected, (state, action) => {
         state.loading = false;
@@ -164,7 +164,7 @@ const videoSlice = createSlice({
       .addCase(getVideoById.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.currentVideo = null; // Clear previous video
+        state.currentVideo = null;
       })
       .addCase(getVideoById.fulfilled, (state, action) => {
         state.loading = false;
@@ -181,7 +181,7 @@ const videoSlice = createSlice({
       })
       .addCase(updateVideo.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentVideo = action.payload; // Update current video if it's the one being watched
+        state.currentVideo = action.payload;
         state.videos = state.videos.map(video =>
           video._id === action.payload._id ? action.payload : video
         );
@@ -237,6 +237,39 @@ const videoSlice = createSlice({
       .addCase(getRecommendedVideos.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // --- NEW CASES FOR OPTIMISTIC UI UPDATES ---
+
+      // Handle successful video like/dislike
+      .addCase(toggleVideoLike.fulfilled, (state, action) => {
+        if (state.currentVideo && state.currentVideo._id === action.meta.arg) {
+          state.currentVideo.isLiked = action.payload.isLiked;
+          state.currentVideo.likesCount = action.payload.likes;
+        }
+        // Also update the video in the 'videos' array if it's there (e.g., homepage list)
+        state.videos = state.videos.map(video => {
+          if (video._id === action.meta.arg) { // action.meta.arg contains the videoId passed to the thunk
+            return {
+              ...video,
+              isLiked: action.payload.isLiked,
+              likesCount: action.payload.likes
+            };
+          }
+          return video;
+        });
+      })
+
+      // Handle successful subscription toggle (for the video's owner)
+      .addCase(toggleSubscription.fulfilled, (state, action) => {
+        // action.meta.arg contains the channelId (which is the owner's _id)
+        // action.payload contains { subscribers: number, isSubscribed: boolean }
+        if (state.currentVideo && state.currentVideo.owner?._id === action.meta.arg) {
+          state.currentVideo.owner.isSubscribed = action.payload.isSubscribed;
+          state.currentVideo.owner.subscriberCount = action.payload.subscribers;
+        }
+        // If you had a 'channels' state for ChannelPage, you'd update that too.
+        // For ChannelPage.jsx, it has its own local state which updates.
       });
   },
 });
