@@ -29,7 +29,7 @@ const Header = () => {
               <Link to="/upload" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors duration-200">
                 Upload Video
               </Link>
-              <div className="relative group">
+              <div className="relative group inline-block p-2 -my-2 rounded-full">
                 <img
                   src={user?.avatar || "https://via.placeholder.com/40"} // Placeholder for user avatar
                   alt="User Avatar"
