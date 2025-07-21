@@ -59,7 +59,7 @@ const VideoCard = ({ video }) => {
         {video.owner && (
           <div className="flex items-center mt-3">
             <img
-              src={video.owner.avatar?.url}
+              src={video.owner.avatar}
               alt={video.owner.fullName}
               className="w-8 h-8 rounded-full object-cover mr-2"
             />

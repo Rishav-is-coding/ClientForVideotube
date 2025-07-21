@@ -47,7 +47,7 @@ const SubscribedChannelsPage = () => {
             className="flex flex-col items-center bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
             <img
-              src={channel.avatar?.url}
+              src={channel.avatar}
               alt={channel.fullName}
               className="w-20 h-20 rounded-full object-cover mb-4 border-2 border-gray-600"
             />

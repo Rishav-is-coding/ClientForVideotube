@@ -186,7 +186,7 @@ const VideoDetail = () => {
         <div className="flex items-center justify-between border-t border-b border-gray-700 py-4 mb-4">
           <Link to={`/channel/${currentVideo.owner?.userName}`} className="flex items-center">
             <img
-              src={currentVideo.owner?.avatar?.url}
+              src={currentVideo.owner?.avatar}
               alt={currentVideo.owner?.fullName}
               className="w-12 h-12 rounded-full object-cover mr-3 border border-gray-600"
             />

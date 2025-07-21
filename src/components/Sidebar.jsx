@@ -63,7 +63,7 @@ const Sidebar = () => {
                   className="flex items-center space-x-2 text-gray-300 hover:text-white hover:bg-gray-700 p-2 rounded-md"
                 >
                   <img
-                    src={channel.avatar?.url }
+                    src={channel.avatar }
                     alt={channel.fullName}
                     className="w-6 h-6 rounded-full object-cover"
                   />
