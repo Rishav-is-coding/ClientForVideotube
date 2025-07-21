@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllVideos } from '../features/video/videoSlice.js';
-import VideoCard from '../components/VideoCard.jsx';
+import VideoCard1 from '../components/VideoCard1.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const HomePage = () => {
@@ -30,7 +30,7 @@ const HomePage = () => {
       <h1 className="text-3xl font-bold text-white mb-6">Explore Videos</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {videos.map((video) => (
-          <VideoCard key={video._id} video={video} />
+          <VideoCard1 key={video._id} video={video} />
         ))}
       </div>
     </div>

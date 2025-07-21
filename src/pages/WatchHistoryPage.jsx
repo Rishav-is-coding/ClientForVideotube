@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import api from '../utils/api.js'; // Direct API call as watch history is a user-specific endpoint
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
-import VideoCard from '../components/VideoCard.jsx';
+import VideoCard1 from '../components/VideoCard1.jsx';
 
 const WatchHistoryPage = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -54,7 +54,7 @@ const WatchHistoryPage = () => {
       <h1 className="text-3xl font-bold text-white mb-6">Your Watch History</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {historyVideos.map((video) => (
-          <VideoCard key={video._id} video={video} />
+          <VideoCard1 key={video._id} video={video} />
         ))}
       </div>
     </div>
