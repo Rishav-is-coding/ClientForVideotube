@@ -80,7 +80,7 @@ const subscriptionSlice = createSlice({
       })
       .addCase(getUserChannelSubscribers.fulfilled, (state, action) => {
         state.loading = false;
-        state.subscribers = action.payload.subscribers; // Assuming payload.subscribers is the array
+        state.subscribers = action.payload; // Assuming payload.subscribers is the array
       })
       .addCase(getUserChannelSubscribers.rejected, (state, action) => {
         state.loading = false;

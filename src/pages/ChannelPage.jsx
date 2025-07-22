@@ -134,6 +134,7 @@ const ChannelPage = () => {
           <li className="pb-2 border-b-2 border-purple-500 text-white">Videos</li>
           <li><Link to={`/playlists/${userName}`} className="hover:text-white">Playlists</Link></li>
           <li><Link to={`/tweets/${userName}`} className="hover:text-white">Tweets</Link></li>
+          <li><Link to={`/channel-subscribers/${channelData._id}`} className="hover:text-white">Subscribers</Link></li>
         </ul>
       </nav>
 
